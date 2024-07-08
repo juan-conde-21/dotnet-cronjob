@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: efcore-cronjob
+  namespace: dotnet-cronjob
+spec:
+  schedule: "*/2 * * * *" # Ejecutar cada 1 minuto
+  successfulJobsHistoryLimit: 3 # Mantener solo el último job exitoso
+  failedJobsHistoryLimit: 3 # Mantener solo el último job fallido
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: efcore-container
+            image: juanconde24/efcoreexampleserilog:v1
+            env:
+            - name: SQLSERVER_NAME
+              value: "sqlserver.dotnet-cronjob.svc" # Asegúrate de que el nombre del servidor SQL sea accesible desde el clúster
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://instana-agent.instana-agent.svc:4317"
+          restartPolicy: OnFailure
